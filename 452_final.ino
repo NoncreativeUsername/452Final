@@ -2,6 +2,7 @@
   -------------LCD---------------
   
   The circuit:
+ * 
     LCD RS pin to digital pin 7
     LCD Enable pin to digital pin 6
     LCD D4 pin to digital pin 5
@@ -14,7 +15,6 @@
     A to 10K resistor to 5V:
     K to Ground
     wiper to LCD VO pin (pin 3)
-
 
 
 -------------POT0-----------------
@@ -45,9 +45,9 @@ Y to pin A0
 
 
 /***********************PIN Definitions*************************/
-// set pin 10 as the slave select (SS) for the digital pot
-// for using Arduino UNO
+// set pin 10 as the slave select (SS) for the digital pot0
 const int CS_PIN = 10;
+// set pin 9 as the slave select (SS) for the digital pot1
 const int CS_PIN1 = 9;
 
 /***********************MCP42XXX Commands************************/
@@ -79,25 +79,24 @@ const int rs = 7, en = 6, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 // IR receiver setup
-
 const byte IR_RECEIVE_PIN = A0;
-//IRrecv irrecv(RECV_PIN);
-//decode_results results;
 
 // variables to be controlled
 float vol = 5.0, treb = 5.0, bass = 5.0;
 int funB = 0;     // keep track of the function button
 
 void setup() {
-  Serial.begin(115200);       //begin serial monitor
+  //Serial.begin(115200);       //begin serial monitor
 
   IrReceiver.begin(IR_RECEIVE_PIN, ENABLE_LED_FEEDBACK);        //start IR receiver
 
   
   pinMode(CS_PIN, OUTPUT);   // set the CS_PIN as an output:
   pinMode(CS_PIN1, OUTPUT);
-  digitalWrite(CS_PIN, HIGH);
+  
+  digitalWrite(CS_PIN, HIGH);    //start slave select high
   digitalWrite(CS_PIN1, HIGH);
+  
   SPI.begin();     // initialize SPI:
   
   // set up the LCD's number of columns and rows:
@@ -119,8 +118,9 @@ void loop() {
   //get input from IR remote
     if (IrReceiver.decode())
    {
-    
-      Serial.println(IrReceiver.decodedIRData.command);
+
+      //send irremove data to serial monitor for testing
+      //Serial.println(IrReceiver.decodedIRData.command);
 
       if (IrReceiver.decodedIRData.command == 71)   //function button pressed
       {
@@ -132,6 +132,8 @@ void loop() {
         {
           funB = 0;
         }
+
+        // helps if you press the function button to long
         delay(30);
       }
 
@@ -173,13 +175,13 @@ void loop() {
    }
 
     // set volume
-    DigitalPotWrite(POT0_SEL, vol* 22.5);
+    DigitalPotWrite(POT0_SEL, vol* 22.5, CS_PIN);
 
     // set trebble
-    DigitalPotWrite1(POT0_SEL, treb * 22.5);
+    DigitalPotWrite(POT0_SEL, treb * 22.5, CS_PIN1);
 
     //set Bass
-    DigitalPotWrite1(POT1_SEL, bass * 22.5);
+    DigitalPotWrite(POT1_SEL, bass * 22.5, CS_PIN1);
 
 
   //update values to LCD
@@ -193,29 +195,16 @@ void loop() {
   lcd.print(treb);
   }
 
-void DigitalPotWrite(int cmd, int val)
+void DigitalPotWrite(int cmd, int val, int POT)
 {
   // constrain input value within 0 - 255
   val = constrain(val, 0, 255);
   // set the CS pin to low to select the chip:
-  digitalWrite(CS_PIN, LOW);
+  digitalWrite(POT, LOW);
   // send the command and value via SPI:
   SPI.transfer(cmd);
   SPI.transfer(val);
   // Set the CS pin high to execute the command:
-  digitalWrite(CS_PIN, HIGH);
+  digitalWrite(POT, HIGH);
 }
 
-
-void DigitalPotWrite1(int cmd, int val)
-{
-  // constrain input value within 0 - 255
-  val = constrain(val, 0, 255);
-  // set the CS pin to low to select the chip:
-  digitalWrite(CS_PIN1, LOW);
-  // send the command and value via SPI:
-  SPI.transfer(cmd);
-  SPI.transfer(val);
-  // Set the CS pin high to execute the command:
-  digitalWrite(CS_PIN1, HIGH);
-}

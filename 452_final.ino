@@ -15,7 +15,6 @@
     A to 10K resistor to 5V:
     K to Ground
     wiper to LCD VO pin (pin 3)
-
 -------------POT0-----------------
 volume
 SI to pin 11
@@ -38,6 +37,7 @@ Y to pin A0
 #include <LiquidCrystal.h>
 #include <SPI.h>
 #include <IRremote.h>
+#include <SD.h>
 
 
 
@@ -46,6 +46,8 @@ Y to pin A0
 const int CS_PIN = 10;
 // set pin 9 as the slave select (SS) for the digital pot1
 const int CS_PIN1 = 9;
+// set pin 8 as the slave select (SS) for SD card reader
+const int SD_PIN = 8;
 
 /***********************MCP42XXX Commands************************/
 //potentiometer select byte
@@ -79,26 +81,56 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 const byte IR_RECEIVE_PIN = A0;
 
 // variables to be controlled
-float vol = 5.0, treb = 5.0, bass = 5.0, ton = 5.0;
+float vol = 5.0, treb = 5.0, bass = 5.0, ton = 5;
+float settings[4];  //settings values to be read from sd card
 int funB = 0;     // keep track of the function button
+bool SD_card = true;   //is there an SD card inserted
+File myFile;
 
-void setup() {
-  //Serial.begin(115200);       //begin serial monitor
+void setup() 
+{
+  Serial.begin(115200);       //begin serial monitor
 
   IrReceiver.begin(IR_RECEIVE_PIN, ENABLE_LED_FEEDBACK);        //start IR receiver
 
   
   pinMode(CS_PIN, OUTPUT);   // set the CS_PIN as an output:
   pinMode(CS_PIN1, OUTPUT);
+  pinMode(SD_PIN, OUTPUT);
   
   digitalWrite(CS_PIN, HIGH);    //start slave select high
   digitalWrite(CS_PIN1, HIGH);
+  digitalWrite(SD_PIN, HIGH);
   
   SPI.begin();     // initialize SPI:
+
+  //SD.begin(SD_PIN);
+
+  if(SD.begin(SD_PIN))
+  {
+    lcd.print("no SD card");
+    SD_card = false;
+    Serial.print("no SD card");
+    delay(500);
+    while(1);
+  }
+
+  myFile = SD.open("settings.txt");
+
+  for (int i = 0; i < 3; i++)
+  {
+    settings[i] = myFile.parseInt();
+  }
   
+  myFile.close();
+
+  vol = settings[0];
+  bass = settings[1];
+  treb = settings[2];
+
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
-
+  
   //initial values to display
   lcd.print("Vol:");
   lcd.print(vol);
@@ -113,7 +145,7 @@ void setup() {
   lcd.setCursor(8, 1);
   lcd.print("Tone:");
   */
-  }
+}
 
 void loop() {
 
@@ -124,59 +156,59 @@ void loop() {
       //send irremove data to serial monitor for testing
       //Serial.println(IrReceiver.decodedIRData.command);
 
-      if (IrReceiver.decodedIRData.command == 71)   //function button pressed
+    if (IrReceiver.decodedIRData.command == 71)   //function button pressed
+    {
+      if (funB < 2)
       {
-        if (funB == 0)
-        {
-          funB++;
-        }
-        else
-        {
-          funB = 0;
-        }
+        funB++;
+      }
+      else
+      {
+        funB = 0;
+      }
 
         // helps if you press the function button to long
         delay(50);
-      }
+    }
 
-      if (IrReceiver.decodedIRData.command == 9 && funB == 0 && bass < 10)    //up button and funtion 0 bass
-      {
-        bass += 0.1;
-      }
-      else if (IrReceiver.decodedIRData.command == 7 && funB == 0 && bass > 0.1)  //down button and function 0
-      {
-        bass -= 0.1;
-      }
-      else if (IrReceiver.decodedIRData.command == 9 && funB == 1 && treb < 10) //up button and function 1
-      {
-        treb += 1;
-      }
-      else if (IrReceiver.decodedIRData.command == 7 && funB == 1 && treb > 0.1)  //down button and function 1
-      {
-        treb -= 1;
-      }
-      else if (IrReceiver.decodedIRData.command == 70 && vol < 11.1)  //volume up presses
-      {
-        vol += 0.1;
-      }
-      else if (IrReceiver.decodedIRData.command == 21 && vol > 0.1)   //volume down pressed
-      {
-        vol -= 0.1;
-      }
-      /*
-      else if (IrReceiver.decodedIRData.command == 9 && funB == 2 && ton < 10)  //up button and function 2
-      {
-        ton += 0.1;
-      }
-      else if (IrReceiver.decodedIRData.command == 7 && funB == 2 && ton > 0.1) //down button and function 2
-      {
-        ton -= 0.1;
-      }
-      */
+    if (IrReceiver.decodedIRData.command == 9 && funB == 0 && bass < 10)    //up button and funtion 0 bass
+    {
+      bass += 0.1;
+    }
+    else if (IrReceiver.decodedIRData.command == 7 && funB == 0 && bass > 0.1)  //down button and function 0
+    {
+      bass -= 0.1;
+    }
+    else if (IrReceiver.decodedIRData.command == 9 && funB == 1 && treb < 10) //up button and function 1
+    {
+      treb += 1;
+    }
+    else if (IrReceiver.decodedIRData.command == 7 && funB == 1 && treb > 0.1)  //down button and function 1
+    {
+      treb -= 1;
+    }
+    else if (IrReceiver.decodedIRData.command == 70 && vol < 11.1)  //volume up presses
+    {
+      vol += 0.1;
+    }
+    else if (IrReceiver.decodedIRData.command == 21 && vol > 0.1)   //volume down pressed
+    {
+      vol -= 0.1;
+    }
+    
+    else if (IrReceiver.decodedIRData.command == 9 && funB == 2 && ton < 10)  //up button and function 2
+    {
+      ton += 0.1;
+    }
+    else if (IrReceiver.decodedIRData.command == 7 && funB == 2 && ton > 0.1) //down button and function 2
+    {
+      ton -= 0.1;
+    }
+    
 
 
-      IrReceiver.resume();     // resume listening to the IR sensor
-   }
+    IrReceiver.resume();     // resume listening to the IR sensor
+  }
 
     // set volume
     DigitalPotWrite(POT0_SEL, vol* 4.5 + 205, CS_PIN);  //pot values below 205 to quite, scales 0.1-11.1 to the remaining values
@@ -188,7 +220,18 @@ void loop() {
     DigitalPotWrite(POT1_SEL, bass * 14.2 + 112, CS_PIN1);  // pot values below 112 sound bad
 
     //set tone
-    //DigitalPotWrite(POT1_SEL, ton * 25.5, CS_PIN);
+    DigitalPotWrite(POT1_SEL, ton * 25.5, CS_PIN);
+
+    myFile = SD.open("settings.txt");
+
+    if (myFile)
+    {
+      myFile.println(vol);
+      myFile.println(bass);
+      myFile.println(treb);
+    }
+
+  myFile.close();
 
 
   //update values to LCD
@@ -201,12 +244,9 @@ void loop() {
   lcd.setCursor(5,1);
   lcd.print(treb);
   lcd.setCursor(8, 1);
-
-  /*
   lcd.print("T");
   lcd.setCursor(13, 1);
   lcd.print(ton);
-  */
   }
   
 

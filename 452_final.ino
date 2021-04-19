@@ -15,18 +15,15 @@
     A to 10K resistor to 5V:
     K to Ground
     wiper to LCD VO pin (pin 3)
-
 -------------POT0-----------------
 volume
 SI to pin 11
 CS to pin 10
 SCK to pin 13
-
 -------------POT1-----------------
 SI to pin 11
 CS to pin 9
 SCK to pin 13
-
 --------------IR------------------
 G to ground
 R to Vcc
@@ -79,7 +76,7 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 const byte IR_RECEIVE_PIN = A0;
 
 // variables to be controlled
-float vol = 5.0, treb = 5.0, bass = 5.0, ton = 5.0;
+float vol = 5.0, treb = 5.0, bass = 5.0;
 int funB = 0;     // keep track of the function button
 
 void setup() {
@@ -108,11 +105,6 @@ void setup() {
   lcd.setCursor(0,1);
   lcd.print("Treb:");
   lcd.print(treb);
-
-  /*
-  lcd.setCursor(8, 1);
-  lcd.print("Tone:");
-  */
   }
 
 void loop() {
@@ -163,16 +155,6 @@ void loop() {
       {
         vol -= 0.1;
       }
-      /*
-      else if (IrReceiver.decodedIRData.command == 9 && funB == 2 && ton < 10)  //up button and function 2
-      {
-        ton += 0.1;
-      }
-      else if (IrReceiver.decodedIRData.command == 7 && funB == 2 && ton > 0.1) //down button and function 2
-      {
-        ton -= 0.1;
-      }
-      */
 
 
       IrReceiver.resume();     // resume listening to the IR sensor
@@ -187,9 +169,6 @@ void loop() {
     //set Bass
     DigitalPotWrite(POT1_SEL, bass * 14.2 + 112, CS_PIN1);  // pot values below 112 sound bad
 
-    //set tone
-    //DigitalPotWrite(POT1_SEL, ton * 25.5, CS_PIN);
-
 
   //update values to LCD
   lcd.setCursor(4,0);
@@ -201,13 +180,7 @@ void loop() {
   lcd.setCursor(5,1);
   lcd.print(treb);
   lcd.setCursor(8, 1);
-
-  /*
-  lcd.print("T");
-  lcd.setCursor(13, 1);
-  lcd.print(ton);
-  */
-  }
+}
   
 
 void DigitalPotWrite(int cmd, int val, int POT)

@@ -133,27 +133,27 @@ void loop() {
 
       if (IrReceiver.decodedIRData.command == 9 && funB == 0 && bass < 10)    //up button and funtion 0 bass
       {
-        bass += 0.1;
+        bass += 0.5;
       }
-      else if (IrReceiver.decodedIRData.command == 7 && funB == 0 && bass > 0.1)  //down button and function 0
+      else if (IrReceiver.decodedIRData.command == 7 && funB == 0 && bass > 0.5)  //down button and function 0
       {
-        bass -= 0.1;
+        bass -= 0.5;
       }
       else if (IrReceiver.decodedIRData.command == 9 && funB == 1 && treb < 10) //up button and function 1
       {
-        treb += 1;
+        treb += 0.5;
       }
-      else if (IrReceiver.decodedIRData.command == 7 && funB == 1 && treb > 0.1)  //down button and function 1
+      else if (IrReceiver.decodedIRData.command == 7 && funB == 1 && treb > 0.5)  //down button and function 1
       {
-        treb -= 1;
+        treb -= 0.5;
       }
-      else if (IrReceiver.decodedIRData.command == 70 && vol < 11.1)  //volume up presses
+      else if (IrReceiver.decodedIRData.command == 70 && vol < 11.5)  //volume up presses
       {
-        vol += 0.1;
+        vol += 0.5;
       }
-      else if (IrReceiver.decodedIRData.command == 21 && vol > 0.1)   //volume down pressed
+      else if (IrReceiver.decodedIRData.command == 21 && vol > 0)   //volume down pressed
       {
-        vol -= 0.1;
+        vol -= 0.5;
       }
 
 
@@ -161,13 +161,13 @@ void loop() {
    }
 
     // set volume
-    DigitalPotWrite(POT0_SEL, vol* 4.5 + 205, CS_PIN);  //pot values below 205 to quite, scales 0.1-11.1 to the remaining values
+    DigitalPotWrite(POT0_SEL, 25.6*exp(0.2002*vol), CS_PIN);
 
     // set trebble
     DigitalPotWrite(POT0_SEL, treb * 25.5, CS_PIN1);
 
     //set Bass
-    DigitalPotWrite(POT1_SEL, bass * 14.2 + 112, CS_PIN1);  // pot values below 112 sound bad
+    DigitalPotWrite(POT1_SEL, bass * 25.5, CS_PIN1);
 
 
   //update values to LCD

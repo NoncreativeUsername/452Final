@@ -40,9 +40,9 @@ Y to pin A0
 
 /***********************PIN Definitions*************************/
 // set pin 10 as the slave select (SS) for the digital pot0
-const int CS_PIN = 10;
+const int CS_PIN_V = 10;
 // set pin 9 as the slave select (SS) for the digital pot1
-const int CS_PIN1 = 9;
+const int CS_PIN_T = 9;
 
 /***********************MCP42XXX Commands************************/
 //potentiometer select byte
@@ -85,11 +85,11 @@ void setup() {
   IrReceiver.begin(IR_RECEIVE_PIN, ENABLE_LED_FEEDBACK);        //start IR receiver
 
   
-  pinMode(CS_PIN, OUTPUT);   // set the CS_PIN as an output:
-  pinMode(CS_PIN1, OUTPUT);
+  pinMode(CS_PIN_V, OUTPUT);   // set the CS_PIN as an output:
+  pinMode(CS_PIN_T, OUTPUT);
   
-  digitalWrite(CS_PIN, HIGH);    //start slave select high
-  digitalWrite(CS_PIN1, HIGH);
+  digitalWrite(CS_PIN_V, HIGH);    //start slave select high
+  digitalWrite(CS_PIN_T, HIGH);
   
   SPI.begin();     // initialize SPI:
   
@@ -161,13 +161,13 @@ void loop() {
    }
 
     // set volume
-    DigitalPotWrite(POT0_SEL, 25.6*exp(0.2002*vol), CS_PIN);
+    DigitalPotWrite(POT0_SEL, 25.6*exp(0.2002*vol), CS_PIN_V);
 
     // set trebble
-    DigitalPotWrite(POT0_SEL, treb * 25.5, CS_PIN1);
+    DigitalPotWrite(POT0_SEL, treb * 25.5, CS_PIN_T);
 
     //set Bass
-    DigitalPotWrite(POT1_SEL, bass * 25.5, CS_PIN1);
+    DigitalPotWrite(POT1_SEL, bass * 25.5, CS_PIN_T);
 
 
   //update values to LCD

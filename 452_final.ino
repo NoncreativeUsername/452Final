@@ -161,13 +161,13 @@ void loop() {
    }
 
     // set volume
-    DigitalPotWrite(POT0_SEL, floor(vol/11.5*255), CS_PIN_V);
+    DigitalPotWrite(POT0_SEL, floor(vol/11.5 * 255), CS_PIN_V);
 
     // set trebble
-    DigitalPotWrite(POT0_SEL, treb * 25.5, CS_PIN_T);
+    DigitalPotWrite(POT0_SEL, floor(treb/10 * 255), CS_PIN_T);
 
     //set Bass
-    DigitalPotWrite(POT1_SEL, bass * 25.5, CS_PIN_T);
+    DigitalPotWrite(POT1_SEL, floor(bass/10 * 255), CS_PIN_T);
 
 
   //update values to LCD

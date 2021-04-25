@@ -161,7 +161,7 @@ void loop() {
    }
 
     // set volume
-    DigitalPotWrite(POT0_SEL, 25.6*exp(0.2002*vol), CS_PIN_V);
+    DigitalPotWrite(POT0_SEL, floor(vol/11.5*255), CS_PIN_V);
 
     // set trebble
     DigitalPotWrite(POT0_SEL, treb * 25.5, CS_PIN_T);
